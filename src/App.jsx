@@ -32,19 +32,21 @@ function App() {
   useEffect(() => {
     async function init() {
       if (typeof window.ethereum !== 'undefined') {
-        await window.ethereum.request({ method: 'eth_requestAccounts' })
         const prov = new ethers.BrowserProvider(window.ethereum)
-        const signer = await prov.getSigner()
-        const userAddress = await signer.getAddress()
-        const escrowContract = new ethers.Contract(ESCROW_CONTRACT, escrowAbi, signer)
-        const fireforceContract = new ethers.Contract(FIREFORCE_CONTRACT, fireforceAbi, signer)
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' })
+        if (accounts.length > 0) {
+          const signer = await prov.getSigner()
+          const userAddress = await signer.getAddress()
+          const escrowContract = new ethers.Contract(ESCROW_CONTRACT, escrowAbi, signer)
+          const fireforceContract = new ethers.Contract(FIREFORCE_CONTRACT, fireforceAbi, signer)
 
-        setProvider(prov)
-        setSigner(signer)
-        setWalletAddress(userAddress)
-        setEscrow(escrowContract)
-        setFireforce(fireforceContract)
-        setConnected(true)
+          setProvider(prov)
+          setSigner(signer)
+          setWalletAddress(userAddress)
+          setEscrow(escrowContract)
+          setFireforce(fireforceContract)
+          setConnected(true)
+        }
       }
     }
 
@@ -58,6 +60,15 @@ function App() {
     } else {
       alert('Please install MetaMask to use this app.')
     }
+  }
+
+  function disconnectWallet() {
+    setWalletAddress('')
+    setConnected(false)
+    setSigner(null)
+    setProvider(null)
+    setEscrow(null)
+    setFireforce(null)
   }
 
   async function listNFT() {
@@ -140,8 +151,7 @@ function App() {
 
   return (
     <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
-
-      {/* Header with connect button */}
+      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <h1 style={{ fontSize: '24px', fontWeight: 'bold' }}>Marketplace v1</h1>
         {!connected ? (
@@ -159,13 +169,28 @@ function App() {
             Connect Wallet
           </button>
         ) : (
-          <span style={{ fontSize: '0.9rem', color: '#333' }}>
-            {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '0.9rem', color: '#333' }}>
+              {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+            </span>
+            <button
+              onClick={disconnectWallet}
+              style={{
+                backgroundColor: '#eee',
+                border: 'none',
+                padding: '0.25rem 0.5rem',
+                borderRadius: '6px',
+                fontSize: '0.75rem',
+                cursor: 'pointer'
+              }}
+            >
+              Disconnect
+            </button>
+          </div>
         )}
       </div>
 
-      {/* NFT Listing Form */}
+      {/* Listing Form */}
       <div style={{ marginTop: '2rem' }}>
         <h2 style={{ fontWeight: 'bold' }}>Trade your Fire Force Sashimono</h2>
         <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -218,7 +243,7 @@ function App() {
         </div>
       </div>
 
-      {/* Active Listings */}
+      {/* Listings */}
       <div style={{ marginTop: '3rem' }}>
         <h2 style={{ fontWeight: 'bold' }}>Active Listings</h2>
 
