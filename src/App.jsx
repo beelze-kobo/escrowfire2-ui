@@ -7,7 +7,8 @@ const FIREFORCE_CONTRACT = '0x87983e46B33783Eea3e51d4ab2fc937Ac73D4290'
 const escrowAbi = [
   'function createEscrow(address nftContract, uint256 nftID, uint256 nftAmount, uint256 animeAmountInWei) public',
   'function buyWithAnime(uint256 i) external payable',
-  'function getEscrow(uint256 i) public view returns (tuple(address,address,uint256,uint256,uint256))'
+  'function getEscrow(uint256 i) public view returns (tuple(address,address,uint256,uint256,uint256))',
+  'function removeEscrow(uint256 i) public'
 ]
 
 const fireforceAbi = [
@@ -20,6 +21,7 @@ function App() {
   const [signer, setSigner] = useState(null)
   const [escrow, setEscrow] = useState(null)
   const [fireforce, setFireforce] = useState(null)
+  const [walletAddress, setWalletAddress] = useState('')
   const [listings, setListings] = useState([])
   const [nftID, setNftID] = useState('1')
   const [nftAmount, setNftAmount] = useState('1')
@@ -31,11 +33,13 @@ function App() {
         await window.ethereum.request({ method: 'eth_requestAccounts' })
         const prov = new ethers.BrowserProvider(window.ethereum)
         const signer = await prov.getSigner()
+        const userAddress = await signer.getAddress()
         const escrowContract = new ethers.Contract(ESCROW_CONTRACT, escrowAbi, signer)
         const fireforceContract = new ethers.Contract(FIREFORCE_CONTRACT, fireforceAbi, signer)
 
         setProvider(prov)
         setSigner(signer)
+        setWalletAddress(userAddress)
         setEscrow(escrowContract)
         setFireforce(fireforceContract)
       } else {
@@ -73,11 +77,18 @@ function App() {
     fetchListings()
   }
 
+  async function cancelEscrow(index) {
+    const tx = await escrow.removeEscrow(index)
+    await tx.wait()
+    fetchListings()
+  }
+
   async function fetchListings() {
     const all = []
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 20; i++) {
       try {
         const e = await escrow.getEscrow(i)
+        if (e[3].toString() === '0') continue
         all.push({
           index: i,
           seller: e[0],
@@ -101,7 +112,7 @@ function App() {
     <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
       <h1 style={{ fontSize: '24px', fontWeight: 'bold' }}>EscrowFire2 UI</h1>
 
-      {/* NFT Listing Section */}
+      {/* NFT Listing Form */}
       <div style={{ marginTop: '2rem' }}>
         <h2 style={{ fontWeight: 'bold' }}>List Your NFT</h2>
         <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -157,12 +168,28 @@ function App() {
       {/* Active Listings */}
       <div style={{ marginTop: '3rem' }}>
         <h2 style={{ fontWeight: 'bold' }}>Active Listings</h2>
+
+        <button
+          onClick={fetchListings}
+          style={{
+            marginBottom: '1rem',
+            padding: '0.25rem 0.75rem',
+            background: '#ccc',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
+          🔄 Refresh Listings
+        </button>
+
         {listings.length === 0 && <p>No listings found.</p>}
         {listings.map(listing => (
           <div key={listing.index} style={{ border: '1px solid #ccc', padding: '1rem', marginBottom: '1rem' }}>
             <p><strong>NFT ID:</strong> {listing.tokenID}</p>
             <p><strong>Amount:</strong> {listing.amount}</p>
             <p><strong>Price:</strong> {listing.price} ANIME</p>
+
             <button
               style={{
                 padding: '0.5rem 1rem',
@@ -177,6 +204,24 @@ function App() {
             >
               Buy
             </button>
+
+            {listing.seller.toLowerCase() === walletAddress.toLowerCase() && (
+              <button
+                style={{
+                  marginLeft: '0.5rem',
+                  padding: '0.5rem 1rem',
+                  fontWeight: 'bold',
+                  backgroundColor: '#dc3545',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer'
+                }}
+                onClick={() => cancelEscrow(listing.index)}
+              >
+                Cancel
+              </button>
+            )}
           </div>
         ))}
       </div>
