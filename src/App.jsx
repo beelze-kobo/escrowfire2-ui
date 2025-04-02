@@ -23,6 +23,7 @@ function App() {
   const [escrow, setEscrow] = useState(null)
   const [fireforce, setFireforce] = useState(null)
   const [walletAddress, setWalletAddress] = useState('')
+  const [connected, setConnected] = useState(false)
   const [listings, setListings] = useState([])
   const [nftID, setNftID] = useState('1')
   const [nftAmount, setNftAmount] = useState('1')
@@ -43,13 +44,21 @@ function App() {
         setWalletAddress(userAddress)
         setEscrow(escrowContract)
         setFireforce(fireforceContract)
-      } else {
-        alert('Please install MetaMask to use this app.')
+        setConnected(true)
       }
     }
 
     init()
   }, [])
+
+  async function connectWallet() {
+    if (typeof window.ethereum !== 'undefined') {
+      await window.ethereum.request({ method: 'eth_requestAccounts' })
+      window.location.reload()
+    } else {
+      alert('Please install MetaMask to use this app.')
+    }
+  }
 
   async function listNFT() {
     if (!signer || !escrow || !fireforce) {
@@ -131,7 +140,30 @@ function App() {
 
   return (
     <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
-      <h1 style={{ fontSize: '24px', fontWeight: 'bold' }}>Marketplace v1</h1>
+
+      {/* Header with connect button */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <h1 style={{ fontSize: '24px', fontWeight: 'bold' }}>Marketplace v1</h1>
+        {!connected ? (
+          <button
+            onClick={connectWallet}
+            style={{
+              backgroundColor: '#111',
+              color: 'white',
+              padding: '0.4rem 1rem',
+              borderRadius: '6px',
+              border: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            Connect Wallet
+          </button>
+        ) : (
+          <span style={{ fontSize: '0.9rem', color: '#333' }}>
+            {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+          </span>
+        )}
+      </div>
 
       {/* NFT Listing Form */}
       <div style={{ marginTop: '2rem' }}>
