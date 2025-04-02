@@ -206,7 +206,7 @@ function App() {
           </label>
 
           <label>
-            Price in ANIME
+            TOTAL listing price in ANIME
             <input
               type="text"
               placeholder="Listing price in ANIME (e.g. 0.01)"
