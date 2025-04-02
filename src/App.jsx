@@ -86,7 +86,7 @@ function App() {
       await tx.wait()
     }
 
-    const tx = await escrow.createEscrow(FIREFORCE_CONTRACT, nftID, nftAmount, priceInWei)
+    const tx = await escrow.createEscrow(FIREFORCE_CONTRACT, 1, nftAmount, priceInWei)
     await tx.wait()
     fetchListings()
   }
@@ -194,16 +194,7 @@ function App() {
       <div style={{ marginTop: '2rem' }}>
         <h2 style={{ fontWeight: 'bold' }}>Trade your Fire Force Sashimono</h2>
         <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <label>
-            NFT ID
-            <input
-              type="number"
-              placeholder="The token ID of your NFT (e.g. 1)"
-              value={nftID}
-              onChange={e => setNftID(e.target.value)}
-            />
-          </label>
-
+          
           <label>
             Amount
             <input
