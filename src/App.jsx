@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ethers } from 'ethers'
 
-// Replace with your actual contract addresses
 const ESCROW_CONTRACT = '0x0896Ec6E48479508FD119C2b3C4A6e93C7b1C8E8'
 const FIREFORCE_CONTRACT = '0x87983e46B33783Eea3e51d4ab2fc937Ac73D4290'
 
@@ -102,25 +101,82 @@ function App() {
     <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
       <h1 style={{ fontSize: '24px', fontWeight: 'bold' }}>EscrowFire2 UI</h1>
 
+      {/* NFT Listing Section */}
       <div style={{ marginTop: '2rem' }}>
-        <h2>List NFT</h2>
-        <input placeholder="NFT ID" value={nftID} onChange={e => setNftID(e.target.value)} />
-        <input placeholder="Amount" value={nftAmount} onChange={e => setNftAmount(e.target.value)} />
-        <input placeholder="Price in ANIME (e.g. 0.01)" value={animePrice} onChange={e => setAnimePrice(e.target.value)} />
-        <button onClick={listNFT} disabled={!signer || !escrow || !fireforce}>
-          List NFT
-        </button>
+        <h2 style={{ fontWeight: 'bold' }}>List Your NFT</h2>
+        <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <label>
+            NFT ID
+            <input
+              type="number"
+              placeholder="The token ID of your NFT (e.g. 1)"
+              value={nftID}
+              onChange={e => setNftID(e.target.value)}
+            />
+          </label>
+
+          <label>
+            Amount
+            <input
+              type="number"
+              placeholder="How many copies to list (e.g. 1)"
+              value={nftAmount}
+              onChange={e => setNftAmount(e.target.value)}
+            />
+          </label>
+
+          <label>
+            Price in ANIME
+            <input
+              type="text"
+              placeholder="Listing price in ANIME (e.g. 0.01)"
+              value={animePrice}
+              onChange={e => setAnimePrice(e.target.value)}
+            />
+          </label>
+
+          <button
+            style={{
+              padding: '0.5rem 1rem',
+              marginTop: '1rem',
+              fontWeight: 'bold',
+              backgroundColor: '#111',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer'
+            }}
+            onClick={listNFT}
+            disabled={!signer || !escrow || !fireforce}
+          >
+            List NFT
+          </button>
+        </div>
       </div>
 
+      {/* Active Listings */}
       <div style={{ marginTop: '3rem' }}>
-        <h2>Active Listings</h2>
+        <h2 style={{ fontWeight: 'bold' }}>Active Listings</h2>
         {listings.length === 0 && <p>No listings found.</p>}
         {listings.map(listing => (
           <div key={listing.index} style={{ border: '1px solid #ccc', padding: '1rem', marginBottom: '1rem' }}>
-            <p>NFT ID: {listing.tokenID}</p>
-            <p>Amount: {listing.amount}</p>
-            <p>Price: {listing.price} ANIME</p>
-            <button onClick={() => buy(listing.index, listing.rawPrice)}>Buy</button>
+            <p><strong>NFT ID:</strong> {listing.tokenID}</p>
+            <p><strong>Amount:</strong> {listing.amount}</p>
+            <p><strong>Price:</strong> {listing.price} ANIME</p>
+            <button
+              style={{
+                padding: '0.5rem 1rem',
+                fontWeight: 'bold',
+                backgroundColor: '#198754',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer'
+              }}
+              onClick={() => buy(listing.index, listing.rawPrice)}
+            >
+              Buy
+            </button>
           </div>
         ))}
       </div>
