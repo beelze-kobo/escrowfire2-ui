@@ -13,7 +13,8 @@ const escrowAbi = [
 
 const fireforceAbi = [
   'function setApprovalForAll(address operator, bool approved) external',
-  'function isApprovedForAll(address owner, address operator) external view returns (bool)'
+  'function isApprovedForAll(address owner, address operator) external view returns (bool)',
+  'function uri(uint256) external view returns (string memory)'
 ]
 
 function App() {
@@ -85,10 +86,28 @@ function App() {
 
   async function fetchListings() {
     const all = []
+
     for (let i = 0; i < 20; i++) {
       try {
         const e = await escrow.getEscrow(i)
         if (e[3].toString() === '0') continue
+
+        let uri = await fireforce.uri(e[2])
+        const hexId = e[2].toString(16).padStart(64, '0')
+        uri = uri.replace('{id}', hexId)
+        if (uri.startsWith('ipfs://')) {
+          uri = uri.replace('ipfs://', 'https://ipfs.io/ipfs/')
+        }
+
+        let image = ''
+        try {
+          const res = await fetch(uri)
+          const json = await res.json()
+          image = json.image?.replace('ipfs://', 'https://ipfs.io/ipfs/')
+        } catch (err) {
+          console.error(`Failed to load metadata for token ${e[2]}`, err)
+        }
+
         all.push({
           index: i,
           seller: e[0],
@@ -96,11 +115,13 @@ function App() {
           amount: e[3].toString(),
           price: ethers.formatEther(e[4]),
           rawPrice: e[4],
+          image
         })
       } catch {
         break
       }
     }
+
     setListings(all)
   }
 
@@ -186,6 +207,13 @@ function App() {
         {listings.length === 0 && <p>No listings found.</p>}
         {listings.map(listing => (
           <div key={listing.index} style={{ border: '1px solid #ccc', padding: '1rem', marginBottom: '1rem' }}>
+            {listing.image && (
+              <img
+                src={listing.image}
+                alt={`Token ${listing.tokenID}`}
+                style={{ width: '100%', maxHeight: '250px', objectFit: 'cover', marginBottom: '0.5rem', borderRadius: '8px' }}
+              />
+            )}
             <p><strong>NFT ID:</strong> {listing.tokenID}</p>
             <p><strong>Amount:</strong> {listing.amount}</p>
             <p><strong>Price:</strong> {listing.price} ANIME</p>
