@@ -131,11 +131,11 @@ function App() {
 
   return (
     <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
-      <h1 style={{ fontSize: '24px', fontWeight: 'bold' }}>EscrowFire2 UI</h1>
+      <h1 style={{ fontSize: '24px', fontWeight: 'bold' }}>Marketplace v1</h1>
 
       {/* NFT Listing Form */}
       <div style={{ marginTop: '2rem' }}>
-        <h2 style={{ fontWeight: 'bold' }}>List Your NFT</h2>
+        <h2 style={{ fontWeight: 'bold' }}>Trade your Fire Force Sashimono</h2>
         <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           <label>
             NFT ID
